@@ -1,0 +1,372 @@
+#:import COL_BG main.COL_BG
+#:import COL_PANEL main.COL_PANEL
+#:import COL_PANEL_RAISED main.COL_PANEL_RAISED
+#:import COL_LINE main.COL_LINE
+#:import COL_BLUE main.COL_BLUE
+#:import COL_PURPLE main.COL_PURPLE
+#:import COL_GOLD main.COL_GOLD
+#:import COL_TEXT main.COL_TEXT
+#:import COL_MUTED main.COL_MUTED
+
+<TaskRow>:
+    orientation: "vertical"
+    size_hint_y: None
+    height: self.minimum_height
+    padding: 10
+    spacing: 6
+    canvas.before:
+        Color:
+            rgba: COL_PURPLE if root.is_completed else (COL_GOLD if root.is_timer_active else COL_PANEL)
+        Line:
+            width: 1.2
+            rectangle: self.x, self.y, self.width, self.height
+        Color:
+            rgba: (0.05, 0.04, 0.12, 1) if root.is_completed else COL_PANEL
+        Rectangle:
+            pos: self.x + 1, self.y + 1
+            size: self.width - 2, self.height - 2
+
+    BoxLayout:
+        size_hint_y: None
+        height: 40
+        spacing: 8
+
+        Button:
+            text: "\u2713" if root.is_completed else " "
+            size_hint_x: None
+            width: 34
+            background_normal: ""
+            background_color: COL_PURPLE if root.is_completed else COL_PANEL_RAISED
+            color: (0.02, 0.03, 0.06, 1) if root.is_completed else COL_TEXT
+            on_release: root.on_check()
+
+        BoxLayout:
+            orientation: "vertical"
+            Label:
+                text: root.name_text
+                color: COL_MUTED if root.is_completed else COL_TEXT
+                bold: True
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+            Label:
+                text: root.timer_text if root.is_timer_active else root.meta_text
+                color: COL_GOLD if root.is_timer_active else (COL_PURPLE if root.is_completed else COL_MUTED)
+                font_size: 12
+                halign: "left"
+                valign: "middle"
+                text_size: self.size
+
+        Button:
+            text: "-"
+            size_hint_x: None
+            width: 30
+            background_normal: ""
+            background_color: COL_PANEL_RAISED
+            color: COL_TEXT
+            on_release: root.on_minus()
+
+        Label:
+            text: root.duration_text
+            size_hint_x: None
+            width: 50
+            color: COL_TEXT
+            font_size: 12
+
+        Button:
+            text: "+"
+            size_hint_x: None
+            width: 30
+            background_normal: ""
+            background_color: COL_PANEL_RAISED
+            color: COL_TEXT
+            on_release: root.on_plus()
+
+        # timer controls: shown as one button that starts, then swaps
+        # meaning once a timer is running (kept simple on purpose)
+        Button:
+            text: "\u25b6" if not root.is_timer_active else "\u23f8/\u25b6"
+            size_hint_x: None
+            width: 34
+            background_normal: ""
+            background_color: COL_PANEL_RAISED
+            color: COL_GOLD
+            on_release: root.on_start_timer() if not root.is_timer_active else root.on_pause_resume()
+
+        Button:
+            text: "\u25a0"
+            size_hint_x: None
+            width: 30
+            opacity: 1 if root.is_timer_active else 0
+            disabled: not root.is_timer_active
+            background_normal: ""
+            background_color: COL_PANEL_RAISED
+            color: COL_GOLD
+            on_release: root.on_stop_timer()
+
+        Button:
+            text: "on" if True else "off"
+            size_hint_x: None
+            width: 36
+            background_normal: ""
+            background_color: COL_LINE
+            color: COL_BLUE
+            on_release: root.on_toggle_enabled()
+
+        Button:
+            text: "x"
+            size_hint_x: None
+            width: 26
+            background_normal: ""
+            background_color: (0, 0, 0, 0)
+            color: COL_MUTED
+            on_release: root.on_remove()
+
+    TextInput:
+        text: root.notes_text
+        hint_text: "notes for " + root.name_text + "..."
+        size_hint_y: None
+        height: 50
+        background_color: COL_PANEL_RAISED
+        foreground_color: COL_TEXT
+        multiline: True
+        on_text: root.on_notes_changed(self.text)
+
+
+<QuestPopup>:
+    size_hint: 0.8, 0.3
+    background: ""
+    background_color: (0, 0, 0, 0)
+    separator_height: 0
+    title: ""
+    BoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: (0.03, 0.05, 0.12, 0.95)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: COL_PURPLE
+            Line:
+                width: 1.5
+                rectangle: self.x, self.y, self.width, self.height
+        Label:
+            text: root.title_text
+            font_size: 22
+            bold: True
+            color: COL_PURPLE
+        Label:
+            text: root.subtitle_text
+            font_size: 14
+            color: COL_BLUE
+
+
+BoxLayout:
+    orientation: "vertical"
+    padding: 16
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: COL_BG
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # -- header -----------------------------------------------------------
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_y: None
+        height: 70
+        canvas.before:
+            Color:
+                rgba: COL_BLUE
+            Line:
+                points: [self.x, self.y + self.height, self.x + self.width, self.y + self.height]
+                width: 1.5
+            Line:
+                points: [self.x, self.y, self.x + self.width, self.y]
+                width: 1.5
+
+        BoxLayout:
+            size_hint_y: None
+            height: 20
+            Label:
+                text: "// SYSTEM: DAILY QUEST LOG"
+                color: COL_BLUE
+                font_size: 11
+                halign: "left"
+                text_size: self.size
+            Label:
+                id: streak_label
+                text: app.streak_text
+                color: COL_GOLD
+                font_size: 12
+                halign: "right"
+                text_size: self.size
+
+        Label:
+            text: "STATUS WINDOW"
+            color: COL_TEXT
+            font_size: 24
+            bold: True
+            halign: "left"
+            text_size: self.size
+
+    # -- start time row -----------------------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 44
+        spacing: 8
+        canvas.before:
+            Color:
+                rgba: COL_PANEL
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "start time"
+            color: COL_MUTED
+            size_hint_x: None
+            width: 90
+        TextInput:
+            id: start_time_field
+            text: app.start_time_input
+            multiline: False
+            background_color: COL_PANEL_RAISED
+            foreground_color: COL_BLUE
+        Button:
+            text: "set"
+            size_hint_x: None
+            width: 60
+            background_normal: ""
+            background_color: COL_LINE
+            color: COL_BLUE
+            on_release: app.set_start_time(start_time_field.text)
+
+    # -- budget strip -------------------------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 34
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: COL_PANEL
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "scheduled today"
+            color: COL_MUTED
+            font_size: 11
+            size_hint_x: None
+            width: 110
+        FloatLayout:
+            size_hint_x: 1
+            canvas.before:
+                Color:
+                    rgba: COL_LINE
+                Rectangle:
+                    pos: self.x, self.center_y - 2
+                    size: self.width, 4
+            ProgressBar:
+                id: bar_scheduled
+                max: 100
+                value: 0
+                size_hint: 1, None
+                height: 4
+                pos_hint: {"center_y": 0.5}
+            ProgressBar:
+                id: bar_completed
+                max: 100
+                value: 0
+                size_hint: 1, None
+                height: 4
+                pos_hint: {"center_y": 0.5}
+        Label:
+            text: app.total_hours_text
+            color: COL_BLUE
+            font_size: 11
+            size_hint_x: None
+            width: 130
+
+    # -- task list -----------------------------------------------------------
+    ScrollView:
+        BoxLayout:
+            id: task_list
+            orientation: "vertical"
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: 8
+            padding: 0, 4
+
+    Button:
+        text: "+ add a quest for today"
+        size_hint_y: None
+        height: 40
+        background_normal: ""
+        background_color: COL_PANEL
+        color: COL_MUTED
+        on_release: app.add_task()
+
+    Label:
+        text: "cleared by  " + app.end_time_text
+        color: COL_MUTED
+        font_size: 12
+        size_hint_y: None
+        height: 24
+
+    # -- queued for tomorrow --------------------------------------------------
+    BoxLayout:
+        orientation: "vertical"
+        size_hint_y: None
+        height: 90
+        padding: 8
+        canvas.before:
+            Color:
+                rgba: COL_GOLD
+            Line:
+                width: 1
+                rectangle: self.x, self.y, self.width, self.height
+        Label:
+            text: "// QUEUED - TOMORROW"
+            color: COL_GOLD
+            font_size: 10
+            size_hint_y: None
+            height: 18
+            halign: "left"
+            text_size: self.size
+        BoxLayout:
+            id: queue_list
+            orientation: "vertical"
+            size_hint_y: None
+            height: 28
+        Button:
+            text: "+ schedule something for tomorrow"
+            size_hint_y: None
+            height: 32
+            background_normal: ""
+            background_color: COL_PANEL
+            color: COL_GOLD
+            on_release: app.add_queued_task()
+
+    # -- action row -----------------------------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 48
+        spacing: 10
+        Button:
+            id: clear_day_btn
+            text: "\u2694 clear day"
+            background_normal: ""
+            background_color: COL_PANEL_RAISED
+            color: COL_BLUE
+            on_release: app.toggle_clear_day()
+        Button:
+            id: reschedule_btn
+            text: "\u27f3 reschedule from now"
+            background_normal: ""
+            background_color: COL_PANEL
+            color: COL_MUTED
+            on_release: app.toggle_reschedule()
