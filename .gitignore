@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+kivy-ios-env/
+schedule_data.json
+.DS_Store
