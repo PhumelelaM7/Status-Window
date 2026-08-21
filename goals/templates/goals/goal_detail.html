@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ goal.title }} — Status Window{% endblock %}
+
+{% block content %}
+    <h1>{{ goal.title }}</h1>
+    <p><strong>Term:</strong> {{ goal.get_term_display }}</p>
+    <p><strong>Why it matters:</strong> {{ goal.why_it_matters }}</p>
+    <p><strong>Success looks like:</strong> {{ goal.success_definition }}</p>
+
+    <h2>Linked Quests</h2>
+    {% if quests %}
+        <ul>
+            {% for quest in quests %}
+                <li>
+                    {{ quest.scheduled_date }} — {{ quest.start_time }}
+                    — {{ quest.title }}
+                    {% if quest.is_completed %}
+                        ✅
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No quests linked to this goal yet.</p>
+    {% endif %}
+
+    <p><a href="{% url 'goal_list' %}">Back to all goals</a></p>
+{% endblock %}

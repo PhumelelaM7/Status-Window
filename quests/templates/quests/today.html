@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Today's Schedule — Status Window{% endblock %}
+
+{% block content %}
+    <div class="header-row">
+        <h1>Status Window</h1>
+        <p class="streak">STREAK ×{{ streak }}</p>
+    </div>
+
+    <div class="date-nav">
+        <a href="{% url 'today_schedule_dated' previous_date.year previous_date.month previous_date.day %}">
+            ◀
+        </a>
+        <span class="date-nav-label">
+            {{ today }}
+            {% if is_today %}(Today){% endif %}
+        </span>
+        <a href="{% url 'today_schedule_dated' next_date.year next_date.month next_date.day %}">
+            ▶
+        </a>
+    </div>
+
+    <p><a href="{% url 'add_quest' %}">+ Add a new quest</a></p>
+    <p><a href="{% url 'goal_list' %}">View all goals</a></p>
+
+    <p><strong>Start time:</strong> {{ day_schedule.start_time }}</p>
+
+    {% if schedule_rows %}
+        <div class="timeline">
+            {% for row in schedule_rows %}
+                <div class="timeline-row">
+                    <div class="timeline-time">{{ row.start }}</div>
+
+                    <div class="timeline-marker">
+                        <div class="timeline-diamond"></div>
+                        {% if not forloop.last %}
+                            <div class="timeline-line"></div>
+                        {% endif %}
+                    </div>
+
+                    <div class="timeline-panel">
+                        <div class="quest-header">
+                            <strong>{{ row.quest.title }}</strong>
+                            <div class="reorder-buttons">
+                                <form method="post"
+                                    action="{% url 'move_quest' row.quest.id 'up' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="arrow-btn">▲</button>
+                                </form>
+                                <form method="post"
+                                    action="{% url 'move_quest' row.quest.id 'down' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="arrow-btn">▼</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <span class="quest-meta">
+                            {{ row.start }} – {{ row.end }}
+                            ({{ row.quest.duration_minutes }} min)
+                        </span>
+                        {% if row.quest.goal %}
+                            <em>[Goal: {{ row.quest.goal.title }}]</em>
+                        {% endif %}
+                        {% if not row.quest.is_enabled %}
+                            <em>(disabled)</em>
+                        {% endif %}
+
+                        <form method="post"
+                            action="{% url 'toggle_quest_complete' row.quest.id %}"
+                            class="complete-form">
+                            {% csrf_token %}
+                            {% if row.quest.is_completed %}
+                                <button type="submit" class="complete-btn done">
+                                    ✅ Done
+                                </button>
+                            {% else %}
+                                <button type="submit" class="complete-btn">
+                                    Mark complete
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No quests scheduled for today.</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'clear_day' %}">
+        {% csrf_token %}
+        {% if day_schedule.is_cleared %}
+            <button type="submit">✓ Day cleared (click to undo)</button>
+        {% else %}
+            <button type="submit">⚔ Clear day</button>
+        {% endif %}
+    </form>
+{% endblock %}

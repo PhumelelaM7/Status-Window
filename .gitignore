@@ -5,3 +5,5 @@ venv/
 kivy-ios-env/
 schedule_data.json
 .DS_Store
+db.sqlite3
+venv/

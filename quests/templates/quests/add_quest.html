@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Add Quest — Status Window{% endblock %}
+
+{% block content %}
+    <h1>Add a New Quest</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Quest</button>
+    </form>
+
+    <p><a href="{% url 'today_schedule' %}">Back to today's schedule</a></p>
+{% endblock %}

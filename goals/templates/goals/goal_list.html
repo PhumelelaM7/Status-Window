@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Goals — Status Window{% endblock %}
+
+{% block content %}
+    <h1>Goals</h1>
+
+    <p><a href="{% url 'today_schedule' %}">Back to today's schedule</a></p>
+
+    <h2>Long-term</h2>
+    <ul>
+        {% for goal in goals %}
+            {% if goal.term == "long" %}
+                <li>
+                    <a href="{% url 'goal_detail' goal.id %}">
+                        {{ goal.title }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h2>Short-term</h2>
+    <ul>
+        {% for goal in goals %}
+            {% if goal.term == "short" %}
+                <li>
+                    <a href="{% url 'goal_detail' goal.id %}">
+                        {{ goal.title }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endblock %}
