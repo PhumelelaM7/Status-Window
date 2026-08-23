@@ -492,33 +492,92 @@ button:hover {
     border-color: #4fd8ff;
 }
 
-/* ===== Quest notes (collapsible) ===== */
+/* ===== Daily notes (collapsible) ===== */
 
-.quest-notes {
-    margin-top: 8px;
-    width: 100%;
+.day-notes {
+    margin: 16px 0;
 }
 
-.quest-notes summary {
+.day-notes summary {
     cursor: pointer;
     color: #8ea3bd;
     font-size: 1rem;
 }
 
-.quest-notes summary:hover {
+.day-notes summary:hover {
     color: #4fd8ff;
 }
 
-.quest-notes textarea {
+.day-notes textarea {
     margin-top: 8px;
     width: 100%;
     box-sizing: border-box;
     resize: vertical;
 }
 
-.save-notes-btn {
-    margin-top: 6px;
-    padding: 4px 14px;
+/* ===== App subtitle ===== */
+
+.app-subtitle {
+    color: #8ea3bd;
+    font-size: 0.9rem;
+    margin: 4px 0 16px 0;
+}
+
+/* ===== Start time presets ===== */
+
+.start-time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.start-time-presets {
+    display: flex;
+    gap: 6px;
+}
+
+.start-time-presets form {
+    display: inline;
+}
+
+.preset-btn {
+    padding: 4px 12px;
     font-size: 0.8rem;
-    border:#d6e4f0;
+    background-color: #121a2e;
+    color: #4fd8ff;
+    border: 1px solid #4fd8ff;
+    clip-path: none;
+}
+
+.preset-btn:hover {
+    background-color: #1a2438;
+}
+
+/* ===== Start-day gate ===== */
+
+.start-day-gate {
+    background-color: #121a2e;
+    border: 1px solid #4fd8ff;
+    box-shadow: 0 0 10px rgba(79, 216, 255, 0.2);
+    clip-path: polygon(
+        14px 0, 100% 0, 100% calc(100% - 14px),
+        calc(100% - 14px) 100%, 0 100%, 0 14px
+    );
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.start-day-gate p {
+    color: #8ea3bd;
+    margin-top: 0;
+}
+
+.start-day-btn {
+    font-size: 1.1rem;
+    padding: 12px 32px;
+    background-color: #4fd8ff;
+    box-shadow: 0 0 14px rgba(79, 216, 255, 0.5);
 }

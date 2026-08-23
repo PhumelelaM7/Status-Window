@@ -100,9 +100,22 @@ class DaySchedule(models.Model):
     # What time the schedule starts for this day
     start_time = models.TimeField(default=time(9, 30))
 
+    # Whether the user has committed to starting this day by
+    # pressing "Start My Day". Before this is True, the page only
+    # shows notes (a reflection/diary step) — quests and goals stay
+    # hidden until the user deliberately commits. Once True,
+    # start_time holds the real moment the day began and is locked
+    # from further changes.
+    day_started = models.BooleanField(default=False)
+
     # Whether this day has been marked "cleared" (all quests done,
     # or the user chose to close it out) — used for streak counting
     is_cleared = models.BooleanField(default=False)
+
+    # Free-text notes for the day as a whole, separate from any
+    # individual quest's notes — e.g. general reflections or
+    # reminders that don't belong to one specific quest
+    notes = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.date} (starts {self.start_time})"

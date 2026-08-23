@@ -24,151 +24,194 @@
         </a>
     </div>
 
-    <!-- Quick links: add a quest, view goals -->
-    <p><a href="{% url 'add_quest' %}">+ Add a new quest</a></p>
-    <p><a href="{% url 'goal_list' %}">View all goals</a></p>
+    <p class="app-subtitle">
+        Set your start time. Clear quests as you go. Fall behind, and reschedule as needed.
+    </p>
 
-    <p><strong>Start time:</strong> {{ day_schedule.start_time }}</p>
+    <!-- General notes for the whole day — always visible, even -->
+    <!-- before the day has been started (this is the reflection step) -->
+    <details class="day-notes" open>
+        <summary>› day notes</summary>
+        <form method="post"
+              action="{% url 'update_day_notes' today.year today.month today.day %}">
+            {% csrf_token %}
+            <textarea name="notes"
+                      rows="3"
+                      placeholder="Add general notes for today...">{{ day_schedule.notes }}</textarea>
+            <button type="submit" class="save-notes-btn">Save</button>
+        </form>
+    </details>
 
-    <!-- Progress bar: scheduled vs completed minutes -->
-    <div class="progress-wrap">
-        <div class="progress-label">
-            <span>{{ progress.completed_minutes }} / {{ progress.total_minutes }} min</span>
-            <span>{{ progress.percent }}%</span>
+    {% if is_today and not day_schedule.day_started %}
+
+        <!-- Pre-start gate: today hasn't been committed to yet. -->
+        <!-- Only reflection (notes above) and starting the day are -->
+        <!-- available — quests, goals, and the timeline stay hidden. -->
+        <div class="start-day-gate">
+            <p>You haven't started today yet. Reflect above, then commit when ready.</p>
+            <form method="post" action="{% url 'start_my_day' %}">
+                {% csrf_token %}
+                <button type="submit" class="start-day-btn">
+                    ▶ Start My Day
+                </button>
+            </form>
         </div>
-        <div class="progress-track">
-            <div class="progress-fill" style="width: {{ progress.percent }}%;"></div>
+
+        <!-- Still allowed pre-start: scheduling quests for future -->
+        <!-- dates, since that's planning ahead, not "today's work" -->
+        <p><a href="{% url 'add_quest' %}">+ Schedule a quest for a future date</a></p>
+
+    {% else %}
+
+        <!-- Full view: either today has been started, or this is a -->
+        <!-- past/future day being browsed, which was never gated -->
+
+        <p><a href="{% url 'add_quest' %}">+ Add a new quest</a></p>
+        <p><a href="{% url 'goal_list' %}">View all goals</a></p>
+
+        <p><strong>Start time:</strong> {{ day_schedule.start_time }}</p>
+
+        <!-- Progress bar: scheduled vs completed minutes -->
+        <div class="progress-wrap">
+            <div class="progress-label">
+                <span>{{ progress.completed_minutes }} / {{ progress.total_minutes }} min</span>
+                <span>{{ progress.percent }}%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" style="width: {{ progress.percent }}%;"></div>
+            </div>
         </div>
-    </div>
 
-    <!-- Timeline: one row per scheduled quest -->
-    {% if schedule_rows %}
-        <div class="timeline">
-            {% for row in schedule_rows %}
-                <div class="timeline-row">
+        <!-- Timeline: one row per scheduled quest -->
+        {% if schedule_rows %}
+            <div class="timeline">
+                {% for row in schedule_rows %}
+                    <div class="timeline-row">
 
-                    <!-- Time label for this row -->
-                    <div class="timeline-time">{{ row.start }}</div>
+                        <!-- Time label for this row -->
+                        <div class="timeline-time">{{ row.start }}</div>
 
-                    <!-- Diamond marker + connecting line down to the next row -->
-                    <div class="timeline-marker">
-                        <div class="timeline-diamond"></div>
-                        {% if not forloop.last %}
-                            <div class="timeline-line"></div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Main panel: quest details and all its action buttons -->
-                    <div class="timeline-panel {% if row.quest.is_failed %}failed{% endif %}"
-                         data-quest-id="{{ row.quest.id }}"
-                         data-quest-title="{{ row.quest.title }}"
-                         data-end-time="{{ row.end|time:'H:i' }}"
-                         data-is-completed="{{ row.quest.is_completed|yesno:'true,false' }}"
-                         data-is-failed="{{ row.quest.is_failed|yesno:'true,false' }}">
-
-                        <!-- Quest title + enable toggle + reorder arrows -->
-                        <div class="quest-header">
-                            <strong>{{ row.quest.title }}</strong>
-                            <div class="quest-header-controls">
-                                <form method="post"
-                                      action="{% url 'toggle_quest_enabled' row.quest.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit"
-                                            class="toggle-btn {% if row.quest.is_enabled %}on{% endif %}">
-                                        {% if row.quest.is_enabled %}ON{% else %}OFF{% endif %}
-                                    </button>
-                                </form>
-                                <div class="reorder-buttons">
-                                    <form method="post"
-                                          action="{% url 'move_quest' row.quest.id 'up' %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="arrow-btn">▲</button>
-                                    </form>
-                                    <form method="post"
-                                          action="{% url 'move_quest' row.quest.id 'down' %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="arrow-btn">▼</button>
-                                    </form>
-                                </div>
-                            </div>
+                        <!-- Diamond marker + connecting line down to the next row -->
+                        <div class="timeline-marker">
+                            <div class="timeline-diamond"></div>
+                            {% if not forloop.last %}
+                                <div class="timeline-line"></div>
+                            {% endif %}
                         </div>
 
-                        <!-- Notes: full-width, sits directly under the header row -->
-                        <details class="quest-notes">
-                            <summary>› notes</summary>
-                            <form method="post"
-                                  action="{% url 'update_quest_notes' row.quest.id %}">
-                                {% csrf_token %}
-                                <textarea name="notes"
-                                          rows="3"
-                                          placeholder="Add a note for this quest...">{{ row.quest.notes }}</textarea>
-                                <button type="submit" class="save-notes-btn">Save</button>
-                            </form>
-                        </details>
+                        <!-- Main panel: quest details and all its action buttons -->
+                        <div class="timeline-panel {% if row.quest.is_failed %}failed{% endif %}"
+                             data-quest-id="{{ row.quest.id }}"
+                             data-quest-title="{{ row.quest.title }}"
+                             data-end-time="{{ row.end|time:'H:i' }}"
+                             data-is-completed="{{ row.quest.is_completed|yesno:'true,false' }}"
+                             data-is-failed="{{ row.quest.is_failed|yesno:'true,false' }}">
 
-                        <!-- Computed start/end time + duration -->
-                        <span class="quest-meta">
-                            {{ row.start }} – {{ row.end }}
-                            ({{ row.quest.duration_minutes }} min)
-                        </span>
+                            <!-- Quest title + enable toggle + reorder arrows -->
+                            <div class="quest-header">
+                                <strong>{{ row.quest.title }}</strong>
+                                <div class="quest-header-controls">
+                                    <form method="post"
+                                          action="{% url 'toggle_quest_enabled' row.quest.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                                class="toggle-btn {% if row.quest.is_enabled %}on{% endif %}">
+                                            {% if row.quest.is_enabled %}ON{% else %}OFF{% endif %}
+                                        </button>
+                                    </form>
+                                    <div class="reorder-buttons">
+                                        <form method="post"
+                                              action="{% url 'move_quest' row.quest.id 'up' %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="arrow-btn">▲</button>
+                                        </form>
+                                        <form method="post"
+                                              action="{% url 'move_quest' row.quest.id 'down' %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="arrow-btn">▼</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
 
-                        {% if not row.quest.is_failed %}
-                            <!-- Reschedule link -->
-                            <a href="{% url 'reschedule_quest' row.quest.id %}" class="reschedule-link">
-                                ↻ Reschedule
-                            </a>
-                        {% endif %}
+                            <!-- Notes: full-width, sits directly under the header row -->
+                            <details class="quest-notes">
+                                <summary>› notes</summary>
+                                <form method="post"
+                                      action="{% url 'update_quest_notes' row.quest.id %}">
+                                    {% csrf_token %}
+                                    <textarea name="notes"
+                                              rows="3"
+                                              placeholder="Add a note for this quest...">{{ row.quest.notes }}</textarea>
+                                    <button type="submit" class="save-notes-btn">Save</button>
+                                </form>
+                            </details>
 
-                        <!-- Linked goal, if any -->
-                        {% if row.quest.goal %}
-                            <em>[Goal: {{ row.quest.goal.title }}]</em>
-                        {% endif %}
+                            <!-- Computed start/end time + duration -->
+                            <span class="quest-meta">
+                                {{ row.start }} – {{ row.end }}
+                                ({{ row.quest.duration_minutes }} min)
+                            </span>
 
-                        <!-- Disabled / failed status markers -->
-                        {% if not row.quest.is_enabled %}
-                            <em>(disabled)</em>
-                        {% endif %}
-                        {% if row.quest.is_failed %}
-                            <em class="failed-marker">✗ Failed</em>
-                        {% endif %}
+                            {% if not row.quest.is_failed %}
+                                <!-- Reschedule link -->
+                                <a href="{% url 'reschedule_quest' row.quest.id %}" class="reschedule-link">
+                                    ↻ Reschedule
+                                </a>
+                            {% endif %}
 
-                        {% if not row.quest.is_failed %}
-                            <!-- Mark complete / done button -->
-                            <form method="post"
-                                  action="{% url 'toggle_quest_complete' row.quest.id %}"
-                                  class="complete-form">
-                                {% csrf_token %}
-                                {% if row.quest.is_completed %}
-                                    <button type="submit" class="complete-btn done">
-                                        ✅ Done
-                                    </button>
-                                {% else %}
-                                    <button type="submit" class="complete-btn">
-                                        Mark complete
-                                    </button>
-                                {% endif %}
-                            </form>
-                        {% endif %}
+                            <!-- Linked goal, if any -->
+                            {% if row.quest.goal %}
+                                <em>[Goal: {{ row.quest.goal.title }}]</em>
+                            {% endif %}
 
+                            <!-- Disabled / failed status markers -->
+                            {% if not row.quest.is_enabled %}
+                                <em>(disabled)</em>
+                            {% endif %}
+                            {% if row.quest.is_failed %}
+                                <em class="failed-marker">✗ Failed</em>
+                            {% endif %}
+
+                            {% if not row.quest.is_failed %}
+                                <!-- Mark complete / done button -->
+                                <form method="post"
+                                      action="{% url 'toggle_quest_complete' row.quest.id %}"
+                                      class="complete-form">
+                                    {% csrf_token %}
+                                    {% if row.quest.is_completed %}
+                                        <button type="submit" class="complete-btn done">
+                                            ✅ Done
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="complete-btn">
+                                            Mark complete
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            {% endif %}
+
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No quests scheduled for today.</p>
-    {% endif %}
-
-    <!-- Clear day button + hint -->
-    <form method="post" action="{% url 'clear_day' %}">
-        {% csrf_token %}
-        {% if day_schedule.is_cleared %}
-            <button type="submit">✓ Day cleared (click to undo)</button>
+                {% endfor %}
+            </div>
         {% else %}
-            <button type="submit">⚔ Clear day</button>
-            <p class="clear-day-hint">
-                Complete every enabled quest to clear the day.
-            </p>
+            <p>No quests scheduled for today.</p>
         {% endif %}
-    </form>
+
+        <!-- Clear day button + hint -->
+        <form method="post" action="{% url 'clear_day' %}">
+            {% csrf_token %}
+            {% if day_schedule.is_cleared %}
+                <button type="submit">✓ Day cleared (click to undo)</button>
+            {% else %}
+                <button type="submit">⚔ Clear day</button>
+                <p class="clear-day-hint">
+                    Complete every enabled quest to clear the day.
+                </p>
+            {% endif %}
+        </form>
+
+    {% endif %}
 
 {% endblock %}

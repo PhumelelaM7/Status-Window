@@ -41,4 +41,15 @@ urlpatterns = [
         views.update_quest_notes,
         name="update_quest_notes",
     ),
+    path(
+        "<int:year>/<int:month>/<int:day>/notes/",
+        views.update_day_notes,
+        name="update_day_notes",
+    ),
+    path(
+        "<int:year>/<int:month>/<int:day>/set-start-time/",
+        views.set_start_time,
+        name="set_start_time",
+    ),
+    path("start-my-day/", views.start_my_day, name="start_my_day"),
 ]

@@ -389,3 +389,109 @@ def update_quest_notes(request, quest_id):
         )
 
     return redirect("today_schedule")
+
+
+def update_day_notes(request, year, month, day):
+    """
+    Save the general notes for a specefic day.
+
+    Unlike  quest notes, this always operates on a specefic date
+    passed in via the URL - matching how the schedule page itself
+    can show any day, not just today.
+    """
+
+    if request.method == "POST":
+        viewed_date = timezone.datetime(
+            year=year, month=month, day=day
+        ).date()
+
+        day_schedule, _ = DaySchedule.objects.get_or_create(
+            date=viewed_date
+        )
+
+        day_schedule.notes = request.POST.get("notes", "")
+        day_schedule.save()
+
+        return redirect(
+            "today_schedule_dated",
+            year=viewed_date.year,
+            month=viewed_date.month,
+            day=viewed_date.day,
+        )
+
+    return redirect("today_schedule")
+
+
+def set_start_time(request, year, month, day):
+    """Set a day's start time to one of a few quick preset values.
+
+    Used by the quick-select buttons (09:00 / 09:30 / 10:00) next
+    to the Start Time field, as a faster alternative to typing.
+    """
+
+    # Only allow this action via POST — same safety pattern used
+    # by every other action view in this file
+    if request.method == "POST":
+        # Rebuild the actual date being viewed from the URL's
+        # year/month/day parts
+        viewed_date = timezone.datetime(
+            year=year, month=month, day=day
+        ).date()
+
+        # The submitted preset time, e.g. "09:30", sent by whichever
+        # quick-select button was clicked
+        new_time_str = request.POST.get("start_time")
+
+        if new_time_str:
+            # Parse the "HH:MM" text into a real time object
+            new_time = datetime.strptime(
+                new_time_str, "%H:%M"
+            ).time()
+
+            # Fetch (or create) that day's DaySchedule row, then
+            # update its start_time to the chosen preset
+            day_schedule, _ = DaySchedule.objects.get_or_create(
+                date=viewed_date
+            )
+            day_schedule.start_time = new_time
+            day_schedule.save()
+
+        # Send the user back to the same day's page so they see
+        # the updated start time and recalculated schedule
+        return redirect(
+            "today_schedule_dated",
+            year=viewed_date.year,
+            month=viewed_date.month,
+            day=viewed_date.day,
+        )
+
+    # If reached via GET somehow, just send back to today
+    return redirect("today_schedule")
+
+
+def start_my_day(request):
+    """
+    Commit to starting today, capturing the real current time.
+
+    This only ever applies to the actual current day - starting a
+    past or future day wouldn't make sense, since the whole point
+    is capturing the real moment the user began. Once set,
+    day_started and started_time are treated as locked; this view is
+    the only place that ever sets them.
+    """
+
+    if request.method == "POST":
+        today = timezone.localdate()
+
+        day_schedule, _ = DaySchedule.objects.get_or_create(date=today)
+
+        # Only act if the day hasn't already been started - this
+        # gaurds against the button somehow being pressed twice,
+        # which would otherwise silently overwrite the original
+        # Commitment time
+        if not day_schedule.day_started:
+            day_schedule.start_time = timezone.localtime().time()
+            day_schedule.day_started = True
+            day_schedule.save()
+
+    return redirect("today_schedule")
