@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 
-def compute_schedule(quests, day_start_time):
+def compute_schedule(quests, day_start_time, reschedule_from=None):
     """Work out each quest's start/end time in order.
 
     quests must already be sorted by `order` (Quest's Meta.ordering
@@ -12,23 +12,26 @@ def compute_schedule(quests, day_start_time):
     Returns a list of dicts: {"quest": quest, "start": time, "end": time}
     """
 
-    # Convert the day's start time (a datetime.time) into total
-    # minutes since midnight, so we can do simple integer math
+    # Convert the day's start time into total minutes since
+    # midnight, so we can do simple integer math
     cursor_minutes = day_start_time.hour * 60 + day_start_time.minute
 
     rows = []
     for quest in quests:
+        # If this quest has an anchor time, jump the cursor
+        # directly to it - ignoring wherever the cascade currently
+        # sits, whether that's earlier or atr than the anchor
+        if quest.anchor_time is not None:
+            cursor_minutes = (
+                quest.anchor_time.hour * 60 + quest.anchor_time.minute
+            )
+            
         start_minutes = cursor_minutes
 
         if quest.is_enabled:
-            # Only enabled quests actually take up time and push
-            # the cursor forward
             cursor_minutes += quest.duration_minutes
             end_minutes = cursor_minutes
         else:
-            # A disabled quest doesn't move the schedule forward;
-            # it just sits at the same point a following quest
-            # would start
             end_minutes = start_minutes
 
         rows.append({
@@ -70,3 +73,41 @@ def compute_streak(cleared_dates, today):
         cursor -= timedelta(days=1)
 
     return streak
+
+
+def compute_progress(quests):
+    """
+    Work out total scheduled minutes vs completed minutes.
+
+    Only enabled quests count toward the total - a disabled quest
+    isn't part of todays plan, so it shouldnt affect the bar.
+    Returns a dict with total_minutes, completed_minutes, 
+    and percent (0-100, rounded to a whole number)
+    """
+
+    total_minutes = 0
+    completed_minutes = 0
+
+    for quest in quests:
+        if not quest.is_enabled or quest.is_failed:
+            # Skip disabled quests entirely - they don't count
+            # toward the schedule at all.
+            continue
+
+        total_minutes += quest.duration_minutes
+
+        if quest.is_completed:
+            completed_minutes += quest.duration_minutes
+
+    # Avoid a divide-by-zero if there are no scheduled quests yet.
+    if total_minutes == 0:
+        percent = 0
+    else:
+        percent = round((completed_minutes / total_minutes) * 100)
+
+    return {
+        "total_minutes": total_minutes,
+        "completed_minutes": completed_minutes,
+        "percent": percent,
+    }     
+

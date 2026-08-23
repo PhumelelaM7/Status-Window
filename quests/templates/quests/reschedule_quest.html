@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Reschedule Quest — Status Window{% endblock %}
+
+{% block content %}
+    <h1>Reschedule Quest</h1>
+
+    <p>Moving: <strong>{{ quest.title }}</strong></p>
+    <p>Currently scheduled: {{ quest.scheduled_date }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="new_date">New date</label>
+        <input
+            type="date"
+            id="new_date"
+            name="new_date"
+            value="{{ quest.scheduled_date|date:'Y-m-d' }}"
+            required
+        >
+        <label for="new_time">New time</label>
+        <input
+            type="time"
+            id="new_time"
+            name="new_time"
+            value="{{ quest.start_time|date:'H:i' }}"
+            required
+        >
+        <button type="submit">Move quest</button>
+    </form>
+
+    <p>
+        <a href="{% url 'today_schedule_dated' quest.scheduled_date.year quest.scheduled_date.month quest.scheduled_date.day %}">
+            Cancel
+        </a>
+    </p>
+{% endblock %}

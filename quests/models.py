@@ -1,6 +1,6 @@
 from django.db import models
 from goals.models import Goal
-
+from datetime import time
 
 class Quest(models.Model):
     """A single scheduled task on a given day.
@@ -44,15 +44,27 @@ class Quest(models.Model):
     # but stays in the database rather than being deleted.
     is_enabled = models.BooleanField(default=True)
 
-    # Computed/stored start time. Set by our scheduling logic based
-    # on order + duration, not typed in directly for most quests.
-    start_time = models.TimeField()
+    # What time the schedule starts for this day
+    start_time = models.TimeField(default=time(9, 30))
+
+    # When set, this quest's start time is "pinned" to this exact
+    # clock time rather than following the normal cascade from the
+    # previous quest. Used by reschedule: moving a quest to a new
+    # time should make it actually start there, not just fall
+    # wherever the running total happens to land.
+    anchor_time = models.TimeField(blank=True, null=True)
 
     # How long the quest is expected to take, in minutes
     duration_minutes = models.PositiveIntegerField(default=30)
 
     # Whether the quest has been completed
     is_completed = models.BooleanField(default=False)
+
+    # Whether this quest's time passed while still incomplete and
+    # the user chose not to reschedule it — a permanent, separate
+    # state from is_completed. A quest can't be both completed and
+    # failed; our own logic (not the database) will enforce that.
+    is_failed = models.BooleanField(default=False)
 
     # Timestamp for when it was actually marked complete (if it was)
     completed_at = models.DateTimeField(blank=True, null=True)
@@ -72,8 +84,10 @@ class Quest(models.Model):
 
 
 class DaySchedule(models.Model):
-    """Per-day settings: what time the schedule starts, and whether
-    the day has been marked cleared (used for streak tracking).
+    """Per-day settings: what time the schedule starts, whether the
+    day has been marked cleared (streak tracking), and whether
+    "reschedule from now" is active (Water ring: flows remaining
+    quests forward to the current time when running behind).
 
     One row per calendar date. Quests reference a date directly
     rather than a DaySchedule, so a DaySchedule only needs to exist
@@ -84,7 +98,7 @@ class DaySchedule(models.Model):
     date = models.DateField(unique=True)
 
     # What time the schedule starts for this day
-    start_time = models.TimeField(default="09:30")
+    start_time = models.TimeField(default=time(9, 30))
 
     # Whether this day has been marked "cleared" (all quests done,
     # or the user chose to close it out) — used for streak counting

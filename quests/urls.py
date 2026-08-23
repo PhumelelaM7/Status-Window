@@ -21,4 +21,24 @@ urlpatterns = [
         views.move_quest,
         name="move_quest",
     ),
+    path(
+        "quest/<int:quest_id>/toggle-enabled/",
+        views.toggle_quest_enabled,
+        name="toggle_quest_enabled",
+    ),
+    path(
+        "quest/<int:quest_id>/reschedule/",
+        views.reschedule_quest,
+        name="reschedule_quest",
+    ),
+    path(
+        "quest/<int:quest_id>/mark-failed/",
+        views.mark_quest_failed,
+        name="mark_quest_failed",
+    ),
+    path(
+        "quest/<int:quest_id>/notes/",
+        views.update_quest_notes,
+        name="update_quest_notes",
+    ),
 ]
