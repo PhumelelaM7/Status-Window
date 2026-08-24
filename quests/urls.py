@@ -52,4 +52,9 @@ urlpatterns = [
         name="set_start_time",
     ),
     path("start-my-day/", views.start_my_day, name="start_my_day"),
+    path(
+        "quest/<int:quest_id>/unlink-goal/",
+        views.unlink_quest_from_goal,
+        name="unlink_quest_from_goal",
+    ),
 ]

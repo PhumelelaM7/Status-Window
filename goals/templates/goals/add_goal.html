@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Add Goal — Status Window{% endblock %}
+
+{% block content %}
+
+    <h1>Add a New Goal</h1>
+
+    <!-- ModelForm-generated fields for title, why it matters, -->
+    <!-- success definition, and term (short/long) -->
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Goal</button>
+    </form>
+
+    <p><a href="{% url 'goal_list' %}">Back to all goals</a></p>
+
+{% endblock %}

@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Goal
+from .forms import GoalForm
 
 
 def goal_list(request):
@@ -34,3 +35,28 @@ def goal_detail(request, goal_id):
     }
 
     return render(request, "goals/goal_detail.html", context)
+
+
+def add_goal(request):
+    """
+    Show a form to add a new goal, and save it on submission.
+    """
+
+    # A GET request means the page was just visited (show blank
+    # form). A POST request means the form was submitted.
+    if request.method == "POST":
+        form = GoalForm(request.POST)
+
+        if form.is_valid():
+            # .save() writes a new Goal row to the database
+            form.save()
+
+            # Redirect back to the goals list, following the same
+            # Post/Redirect/Get pattern used everywhere else in
+            # this project - avoids resubmitting the form on refresh
+            return redirect("goal_list")
+    else:
+        # No data submitted yet - show an empty form
+        form = GoalForm()
+
+    return render(request, "goals/add_goal.html", {"form": form})

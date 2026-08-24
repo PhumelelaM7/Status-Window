@@ -495,3 +495,27 @@ def start_my_day(request):
             day_schedule.save()
 
     return redirect("today_schedule")
+
+
+def unlink_quest_from_goal(request, quest_id):
+    """
+    Remove a quest's link to its goal, without deleting the quest.
+    
+    The quest stays exactly where it is on the schedule day - it
+    just becomes a plain, goal-less quest afterward.
+    """
+
+    if request.method == "POST":
+        quest = get_object_or_404(Quest, id=quest_id)
+
+        # Remember which goal it was linked to, so we can redirect
+        # back to that goal's detail page afterward
+        goal_id = quest.goal_id
+
+        quest.goal = None
+        quest.save()
+
+        if goal_id:
+            return redirect("goal_detail", goal_id=goal_id)
+
+    return redirect("today_schedule")

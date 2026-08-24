@@ -3,11 +3,15 @@
 {% block title %}{{ goal.title }} — Status Window{% endblock %}
 
 {% block content %}
+
+    <!-- Goal details: title, term, and the Earth-ring fields -->
     <h1>{{ goal.title }}</h1>
     <p><strong>Term:</strong> {{ goal.get_term_display }}</p>
     <p><strong>Why it matters:</strong> {{ goal.why_it_matters }}</p>
     <p><strong>Success looks like:</strong> {{ goal.success_definition }}</p>
 
+    <!-- Every quest currently linked to this goal, with an option -->
+    <!-- to unlink each one without deleting the quest itself -->
     <h2>Linked Quests</h2>
     {% if quests %}
         <ul>
@@ -18,6 +22,15 @@
                     {% if quest.is_completed %}
                         ✅
                     {% endif %}
+
+                    <form method="post"
+                          action="{% url 'unlink_quest_from_goal' quest.id %}"
+                          class="unlink-form">
+                        {% csrf_token %}
+                        <button type="submit" class="unlink-btn">
+                            ✕ Unlink
+                        </button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
@@ -26,4 +39,5 @@
     {% endif %}
 
     <p><a href="{% url 'goal_list' %}">Back to all goals</a></p>
+
 {% endblock %}
