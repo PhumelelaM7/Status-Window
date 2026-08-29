@@ -11,6 +11,20 @@
 </head>
 <body>
     <div class="app-shell">
+
+        <!-- Account bar: shows login/logout depending on auth state -->
+        <div class="account-bar">
+            {% if user.is_authenticated %}
+                <span>Logged in as {{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="account-link-btn">Log out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+            {% endif %}
+        </div>
+        
         {% block content %}
         {% endblock %}
     </div>

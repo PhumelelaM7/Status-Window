@@ -623,3 +623,32 @@ button:hover {
     color: #ff6b6b;
     text-shadow: 0 0 8px rgba(255, 107, 107, 0.6);
 }
+
+/* ===== Account bar ===== */
+
+.account-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #8ea3bd;
+    margin-bottom: 8px;
+}
+
+.logout-form {
+    display: inline;
+}
+
+.account-link-btn {
+    background: none;
+    border: none;
+    color: #4fd8ff;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    text-transform: none;
+    clip-path: none;
+}

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Status Window apps
     'goals',
     'quests',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -141,3 +142,10 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Where Django sends users after a successful login, since we
+# don't use the default /accounts/profile/ destination
+LOGIN_REDIRECT_URL = "today_schedule"
+
+# Where Django sends users after logging out
+LOGOUT_REDIRECT_URL = "today_schedule"

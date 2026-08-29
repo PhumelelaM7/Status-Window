@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — Status Window{% endblock %}
+
+{% block content %}
+
+    <h1>Sign Up</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Account</button>
+    </form>
+
+    <p><a href="{% url 'login' %}">Already have an account? Log in</a></p>
+
+{% endblock %}
