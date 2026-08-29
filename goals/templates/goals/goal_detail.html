@@ -10,6 +10,38 @@
     <p><strong>Why it matters:</strong> {{ goal.why_it_matters }}</p>
     <p><strong>Success looks like:</strong> {{ goal.success_definition }}</p>
 
+    <!-- End date, if one was set -->
+    {% if goal.end_date %}
+        <p><strong>End date:</strong> {{ goal.end_date }}</p>
+    {% endif %}
+
+    <!-- Fire ring: countdown to the goal's deadline, if one is set -->
+    {% if countdown %}
+        <p class="countdown countdown-{{ countdown.status }}">
+            {% if countdown.status == "upcoming" %}
+                🔥 {{ countdown.days_remaining }} days remaining
+            {% elif countdown.status == "today" %}
+                🔥 Deadline is today
+            {% else %}
+                🔥 {{ countdown.days_remaining|cut:"-" }} days overdue
+            {% endif %}
+        </p>
+    {% endif %}
+
+    <!-- Mark this goal complete, or undo if it already is -->
+    <form method="post" action="{% url 'toggle_goal_complete' goal.id %}">
+        {% csrf_token %}
+        {% if goal.is_completed %}
+            <button type="submit" class="complete-btn done">
+                ✅ Completed (click to undo)
+            </button>
+        {% else %}
+            <button type="submit" class="complete-btn">
+                Mark Goal Complete
+            </button>
+        {% endif %}
+    </form>
+
     <!-- Every quest currently linked to this goal, with an option -->
     <!-- to unlink each one without deleting the quest itself -->
     <h2>Linked Quests</h2>

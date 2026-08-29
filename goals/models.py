@@ -32,11 +32,22 @@ class Goal(models.Model):
         default=SHORT_TERM,
     )
 
+    # Optional deadline the user sets for this goal — a target to
+    # hit. Used to power a countdown display (tied to the Fire
+    # ring's emphasis on urgency and full presence). Left blank if
+    # the user doesn't want to set one.
+    end_date = models.DateField(blank=True, null=True)
+
     # Timestamp for when the goal was first created
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Whether the goal is still being actively pursued
+        # Whether the goal is still being actively pursued
     is_active = models.BooleanField(default=True)
+
+    # Whether this goal has actually been achieved. Distinct from
+    # is_active — a goal can be inactive without being completed
+    # (e.g. abandoned), so this tracks genuine success specifically.
+    is_completed = models.BooleanField(default=False)
 
     def __str__(self):
         # Shown in the Django admin panel and shell for readability

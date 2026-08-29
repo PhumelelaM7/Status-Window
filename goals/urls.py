@@ -6,4 +6,9 @@ urlpatterns = [
     path("goals/", views.goal_list, name="goal_list"),
     path("goals/add/", views.add_goal, name="add_goal"),
     path("goals/<int:goal_id>/", views.goal_detail, name="goal_detail"),
+    path(
+        "goals/<int:goal_id>/toggle-complete/",
+        views.toggle_goal_complete,
+        name="toggle_goal_complete",
+    ),
 ]

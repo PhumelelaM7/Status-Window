@@ -77,11 +77,22 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # Switched from sqlite3 to mysql — MariaDB uses the same
+        # 'mysql' backend, since MariaDB is protocol-compatible
+        # with MySQL
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'status_window',
+        'USER': 'status_window_user',
+        'PASSWORD': 'PMJ@ke89!!',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            # Ensures proper handling of full Unicode (including
+            # emoji, which this app actually uses in its UI)
+            'charset': 'utf8mb4',
+        },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
