@@ -1,15 +1,23 @@
+"""Views for the goals app: listing, creating, viewing, completing,
+and unlinking quests from goals — all scoped to the logged-in user.
+"""
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from .models import Goal
 from .forms import GoalForm
 from .deadlines import compute_countdown
 
 
+@login_required
 def goal_list(request):
-    """Show every goal, split loosely by short-term vs long-term."""
+    """Show the logged-in user's goals, split by short/long-term."""
 
-    # Pull all goals from the database, most recently created first
-    goals = Goal.objects.all().order_by("-created_at")
+    # Only this user's goals — never show another account's data
+    goals = Goal.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
 
     context = {
         "goals": goals,
@@ -18,20 +26,18 @@ def goal_list(request):
     return render(request, "goals/goal_list.html", context)
 
 
+@login_required
 def goal_detail(request, goal_id):
-    """Show one goal's details plus every quest linked to it."""
+    """Show one goal's details plus every quest linked to it.
 
-    # get_object_or_404 fetches a single Goal by its id, and
-    # automatically shows a proper "not found" page instead of
-    # crashing if the id doesn't exist
-    goal = get_object_or_404(Goal, id=goal_id)
+    get_object_or_404 with user=request.user ensures a user can
+    never view (or guess the URL to) another account's goal.
+    """
 
-    # goal.quests uses the related_name="quests" set on Quest's
-    # ForeignKey — this follows the link backwards, from a Goal to
-    # every Quest that points at it
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+
     quests = goal.quests.all().order_by("scheduled_date", "start_time")
 
-    # Compute the Fire-ring countdown, if this goal has a deadline
     countdown = compute_countdown(goal.end_date, timezone.localdate())
 
     context = {
@@ -43,6 +49,7 @@ def goal_detail(request, goal_id):
     return render(request, "goals/goal_detail.html", context)
 
 
+@login_required
 def add_goal(request):
     """Show a form to add a new goal, and save it on submission."""
 
@@ -50,7 +57,12 @@ def add_goal(request):
         form = GoalForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            # Don't save yet — commit=False gives us the Goal
+            # object so we can assign ownership before writing it
+            goal = form.save(commit=False)
+            goal.user = request.user
+            goal.save()
+
             return redirect("goal_list")
     else:
         form = GoalForm()
@@ -58,11 +70,16 @@ def add_goal(request):
     return render(request, "goals/add_goal.html", {"form": form})
 
 
+@login_required
 def toggle_goal_complete(request, goal_id):
-    """Toggle a goal's is_completed flag on or off."""
+    """Toggle a goal's is_completed flag on or off.
+
+    Marking a goal complete also sets is_active to False, since a
+    completed goal isn't something still being actively pursued.
+    """
 
     if request.method == "POST":
-        goal = get_object_or_404(Goal, id=goal_id)
+        goal = get_object_or_404(Goal, id=goal_id, user=request.user)
 
         goal.is_completed = not goal.is_completed
         goal.is_active = not goal.is_completed

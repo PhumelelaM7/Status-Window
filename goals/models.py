@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Goal(models.Model):
@@ -15,6 +16,11 @@ class Goal(models.Model):
         (SHORT_TERM, "Short-term"),
         (LONG_TERM, "Long-term"),
     ]
+
+    # Which user this goal belongs to. Every goal must have an
+    # owner - on_delete=CASCADE means if a user account is deleted,
+    # their goals are deleted along with it.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # Short label for the goal, e.g. "Learn Python"
     title = models.CharField(max_length=200)

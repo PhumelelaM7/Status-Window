@@ -1,3 +1,6 @@
+"""Form for creating and editing Quest objects."""
+
+
 from django import forms
 from .models import Quest
 
@@ -8,6 +11,21 @@ class QuestForm(forms.ModelForm):
     validation (e.g. required fields, valid time format) stay in
     sync automatically if the model changes later.
     """
+
+    def __init__(self, *args, user=None,  **kwargs):
+        """Call the parent ModelForm's own __init__ first,
+        so all the normal form setup still happens."""
+
+        super().__init__(*args, **kwargs)
+
+        # If a user was passed in, restrict the goal dropdown to
+        # only that user's own goals - otherwise leave it as
+        # Django's default (all goals), which we should never
+        # actually rely on in practice.
+        if user is not None:
+            self.fields["goal"].queryset = self.fields[
+                "goal"
+            ].queryset.filter(user=user)
 
     class Meta:
         # Tell Django which model this form is based on.

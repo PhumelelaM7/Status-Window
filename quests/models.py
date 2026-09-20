@@ -1,6 +1,8 @@
 from django.db import models
 from goals.models import Goal
 from datetime import time
+from django.contrib.auth.models import User
+
 
 class Quest(models.Model):
     """A single scheduled task on a given day.
@@ -15,6 +17,10 @@ class Quest(models.Model):
     so we can still store/display the result, but the view will
     recalculate and overwrite it based on order.
     """
+
+    # Which user this quest belongs to. Every quest must have an
+    # owner, same reasoning as Goal.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # Short label for the quest, e.g. "Read Python docs, chapter 3"
     title = models.CharField(max_length=200)
@@ -44,14 +50,12 @@ class Quest(models.Model):
     # but stays in the database rather than being deleted.
     is_enabled = models.BooleanField(default=True)
 
-    # What time the schedule starts for this day
+    # Computed/stored start time
     start_time = models.TimeField(default=time(9, 30))
 
     # When set, this quest's start time is "pinned" to this exact
     # clock time rather than following the normal cascade from the
-    # previous quest. Used by reschedule: moving a quest to a new
-    # time should make it actually start there, not just fall
-    # wherever the running total happens to land.
+    # previous quest.
     anchor_time = models.TimeField(blank=True, null=True)
 
     # How long the quest is expected to take, in minutes
@@ -61,9 +65,7 @@ class Quest(models.Model):
     is_completed = models.BooleanField(default=False)
 
     # Whether this quest's time passed while still incomplete and
-    # the user chose not to reschedule it — a permanent, separate
-    # state from is_completed. A quest can't be both completed and
-    # failed; our own logic (not the database) will enforce that.
+    # the user chose not to reschedule it
     is_failed = models.BooleanField(default=False)
 
     # Timestamp for when it was actually marked complete (if it was)
@@ -74,48 +76,45 @@ class Quest(models.Model):
 
     class Meta:
         # Default ordering whenever we query Quest without
-        # specifying our own .order_by() — keeps the schedule
-        # order consistent everywhere we use it
+        # specifying our own .order_by()
         ordering = ["scheduled_date", "order"]
 
     def __str__(self):
-        # Shown in the Django admin panel and shell for readability
         return f"{self.title} ({self.scheduled_date})"
 
 
 class DaySchedule(models.Model):
     """Per-day settings: what time the schedule starts, whether the
-    day has been marked cleared (streak tracking), and whether
-    "reschedule from now" is active (Water ring: flows remaining
-    quests forward to the current time when running behind).
+    day has been marked cleared (streak tracking), whether the day
+    has been started, and general notes for the day.
 
-    One row per calendar date. Quests reference a date directly
-    rather than a DaySchedule, so a DaySchedule only needs to exist
-    once someone sets a custom start time or clears the day.
+    One row per user per calendar date.
     """
 
-    # One row per calendar date — no two DaySchedules can share a date
-    date = models.DateField(unique=True)
+    # Which user this day's schedule belongs to — each user has
+    # their own independent DaySchedule per calendar date
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # The calendar date this schedule is for
+    date = models.DateField()
 
     # What time the schedule starts for this day
     start_time = models.TimeField(default=time(9, 30))
 
     # Whether the user has committed to starting this day by
-    # pressing "Start My Day". Before this is True, the page only
-    # shows notes (a reflection/diary step) — quests and goals stay
-    # hidden until the user deliberately commits. Once True,
-    # start_time holds the real moment the day began and is locked
-    # from further changes.
+    # pressing "Start My Day"
     day_started = models.BooleanField(default=False)
 
-    # Whether this day has been marked "cleared" (all quests done,
-    # or the user chose to close it out) — used for streak counting
+    # Whether this day has been marked "cleared"
     is_cleared = models.BooleanField(default=False)
 
-    # Free-text notes for the day as a whole, separate from any
-    # individual quest's notes — e.g. general reflections or
-    # reminders that don't belong to one specific quest
+    # Free-text notes for the day as a whole
     notes = models.TextField(blank=True)
+
+    class Meta:
+        # A user can only have one DaySchedule per date, but
+        # different users can each have their own for the same date
+        unique_together = ("user", "date")
 
     def __str__(self):
         return f"{self.date} (starts {self.start_time})"

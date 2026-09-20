@@ -66,8 +66,15 @@
         <!-- Full view: either today has been started, or this is a -->
         <!-- past/future day being browsed, which was never gated -->
 
-        <p><a href="{% url 'add_quest' %}">+ Add a new quest</a></p>
-        <p><a href="{% url 'goal_list' %}">View all goals</a></p>
+        <!-- Prominent action row: add a quest, view goals -->
+        <div class="action-row">
+            <a href="{% url 'add_quest' %}" class="action-btn action-btn-purple">
+                + Add a new quest
+            </a>
+            <a href="{% url 'goal_list' %}" class="action-btn">
+                View all goals
+            </a>
+        </div>
 
         <p><strong>Start time:</strong> {{ day_schedule.start_time }}</p>
 

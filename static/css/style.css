@@ -652,3 +652,45 @@ button:hover {
     text-transform: none;
     clip-path: none;
 }
+
+/* ===== Prominent action row: add quest / view goals ===== */
+
+.action-row {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border: 1px solid #4fd8ff;
+    color: #4fd8ff;
+    background-color: #121a2e;
+    clip-path: polygon(
+        10px 0, 100% 0, 100% calc(100% - 10px),
+        calc(100% - 10px) 100%, 0 100%, 0 10px
+    );
+}
+
+.action-btn:hover {
+    background-color: #1a2438;
+    text-decoration: none;
+}
+
+/* Purple variant, specifically for "Add a new quest" per request */
+.action-btn-purple {
+    border-color: #b19cff;
+    color: #b19cff;
+}
+
+.action-btn-purple:hover {
+    background-color: rgba(177, 156, 255, 0.15);
+}
