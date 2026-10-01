@@ -1,0 +1,114 @@
+/* ===== Focus mode (Fire ring: Execution Mode) ===== */
+
+/* Full-screen, centered layout — nothing else on the page competes
+   for attention */
+.focus-body {
+    background-color: #0a0e1a;
+    color: #d6e4f0;
+    font-family: 'Rajdhani', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.focus-card {
+    text-align: center;
+    padding: 40px;
+    max-width: 480px;
+    width: 90%;
+}
+
+.focus-label {
+    font-family: 'Orbitron', sans-serif;
+    color: #8ea3bd;
+    letter-spacing: 3px;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.focus-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    color: #4fd8ff;
+    text-shadow: 0 0 12px rgba(79, 216, 255, 0.6);
+    font-size: 1.8rem;
+    margin: 0 0 32px 0;
+}
+
+/* The big countdown number — this is the visual focal point of
+   the whole page */
+.focus-timer {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 4rem;
+    color: #ffb84f;
+    text-shadow: 0 0 20px rgba(255, 184, 79, 0.5);
+    margin-bottom: 32px;
+}
+
+.focus-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.focus-btn {
+    padding: 12px 28px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: #121a2e;
+    color: #d6e4f0;
+    border: 1px solid #4fd8ff;
+    cursor: pointer;
+    clip-path: polygon(
+        10px 0, 100% 0, 100% calc(100% - 10px),
+        calc(100% - 10px) 100%, 0 100%, 0 10px
+    );
+}
+
+.focus-btn:hover {
+    background-color: #1a2438;
+}
+
+.focus-btn.primary {
+    background-color: #4fd8ff;
+    color: #0a0e1a;
+}
+
+.focus-btn.primary:hover {
+    background-color: #7de6ff;
+}
+
+.focus-time-up {
+    margin-top: 16px;
+}
+
+.focus-time-up p {
+    font-family: 'Orbitron', sans-serif;
+    color: #ff6b6b;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+    margin-bottom: 12px;
+}
+
+.hidden {
+    display: none;
+}
+
+.focus-exit-link {
+    display: inline-block;
+    margin-top: 24px;
+    color: #8ea3bd;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.focus-exit-link:hover {
+    color: #4fd8ff;
+    text-decoration: underline;
+}

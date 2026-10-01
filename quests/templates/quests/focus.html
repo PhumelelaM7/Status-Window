@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Focus — {{ quest.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/focus.css' %}">
+</head>
+<body class="focus-body">
+
+    <!-- The whole page is just this one card — no header, no nav,
+         no account bar. Fire ring: nothing exists but this. -->
+    <div class="focus-card">
+        <p class="focus-label">CURRENT OBJECTIVE</p>
+        <h1 class="focus-title">{{ quest.title }}</h1>
+
+        <!-- The countdown display itself, updated live by JS -->
+        <div class="focus-timer" id="focus-timer">
+            {{ quest.duration_minutes }}:00
+        </div>
+
+        <!-- Buttons for controlling the timer -->
+        <div class="focus-controls">
+            <button id="focus-pause-btn" class="focus-btn">Pause</button>
+            <button id="focus-complete-btn" class="focus-btn primary">
+                Complete
+            </button>
+        </div>
+
+        <!-- Hidden by default; shown by JS when the countdown hits 0 -->
+        <div id="focus-time-up" class="focus-time-up hidden">
+            <p>Time's up.</p>
+            <button id="focus-add-time-btn" class="focus-btn">
+                +10 minutes
+            </button>
+            <button id="focus-complete-from-timeup-btn" class="focus-btn primary">
+                Mark Complete
+            </button>
+        </div>
+
+        <a href="{% url 'today_schedule' %}" class="focus-exit-link">
+            ✕ Exit Focus
+        </a>
+    </div>
+
+    <!-- A hidden form used purely to submit the "mark complete"
+         action via POST, since this page has no other forms on it
+         to borrow a CSRF token from -->
+    <form id="complete-form"
+          method="post"
+          action="{% url 'toggle_quest_complete' quest.id %}"
+          style="display: none;">
+        {% csrf_token %}
+    </form>
+
+    <script>
+        // Pass the quest's duration from Django into JavaScript as
+        // a plain number, so focus.js knows where to start counting
+        const FOCUS_DURATION_MINUTES = {{ quest.duration_minutes }};
+    </script>
+    <script src="{% static 'js/focus.js' %}"></script>
+</body>
+</html>

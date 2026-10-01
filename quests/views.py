@@ -486,3 +486,18 @@ def unlink_quest_from_goal(request, quest_id):
             return redirect("goal_detail", goal_id=goal_id)
 
     return redirect("today_schedule")
+
+
+@login_required
+def focus_quest(request, quest_id):
+    """Show a distraction-free focus screen for a single quest.
+
+    This is the Fire ring's "Execution Mode" — everything except
+    the current objective and its countdown is hidden, so the user
+    can commit fully to one thing at a time.
+    """
+
+    quest = get_object_or_404(Quest, id=quest_id, user=request.user)
+
+    return render(request, "quests/focus.html", {"quest": quest})
+

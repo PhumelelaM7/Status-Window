@@ -57,4 +57,14 @@ urlpatterns = [
         views.unlink_quest_from_goal,
         name="unlink_quest_from_goal",
     ),
+    path(
+        "quest/<int:quest_id>/focus/",
+        views.focus_quest,
+        name="focus_quest",
+    ),
+    path(
+        "quest/<int:quest_id>/focus/",
+        views.focus_quest,
+        name="focus_quest",
+    ),
 ]

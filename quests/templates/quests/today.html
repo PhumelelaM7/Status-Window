@@ -160,6 +160,13 @@
                                 ({{ row.quest.duration_minutes }} min)
                             </span>
 
+                            {% if not row.quest.is_completed and not row.quest.is_failed %}
+                                <!-- Fire ring: jump into a distraction-free focus screen -->
+                                <a href="{% url 'focus_quest' row.quest.id %}" class="focus-link">
+                                    ▶ Focus
+                                </a>
+                            {% endif %}
+
                             {% if not row.quest.is_failed %}
                                 <!-- Reschedule link -->
                                 <a href="{% url 'reschedule_quest' row.quest.id %}" class="reschedule-link">
