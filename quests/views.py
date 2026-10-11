@@ -47,8 +47,24 @@ def today_schedule(request, year=None, month=None, day=None):
         scheduled_date=viewed_date, user=request.user
     )
 
-    # Run our pure scheduling logic to get computed start/end times
-    schedule_rows = compute_schedule(quests, day_schedule.start_time)
+    # Water ring: each category gets its own independent schedule,
+    # all starting from the same day start time. This keeps
+    # Essential, Flexibe, and Otional from competing for the
+    # same time slots - they're seperate commitents, not one list.
+    essential_quests = quests.filter(category=Quest.ESSENTIAL)
+    flexible_quests = quests.filter(category=Quest.FLEXIBLE)
+    optional_quests = quests.filter(category=Quest.OPTIONAL)
+
+    essential_rows = compute_schedule(
+        essential_quests, day_schedule.start_time
+    )
+    flexible_rows = compute_schedule(
+        flexible_quests, day_schedule.start_time
+    )
+    optional_rows = compute_schedule(
+        optional_quests, day_schedule.start_time
+    )
+
 
     # Compute today's progress from this user's quests only
     progress = compute_progress(quests)
@@ -73,7 +89,9 @@ def today_schedule(request, year=None, month=None, day=None):
     context = {
         "today": viewed_date,
         "day_schedule": day_schedule,
-        "schedule_rows": schedule_rows,
+        "essential_rows": essential_rows,
+        "flexible_rows": flexible_rows,
+        "optional_rows": optional_rows,
         "progress": progress,
         "streak": streak,
         "previous_date": previous_date,
@@ -500,4 +518,3 @@ def focus_quest(request, quest_id):
     quest = get_object_or_404(Quest, id=quest_id, user=request.user)
 
     return render(request, "quests/focus.html", {"quest": quest})
-

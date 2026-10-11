@@ -672,3 +672,34 @@ button:hover {
         flex-wrap: wrap;
     }
 }
+
+/* ===== Water ring: category section headings ===== */
+
+.category-heading {
+    margin-top: 28px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid;
+}
+
+.category-heading.essential {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+}
+
+.category-heading.flexible {
+    color: #ffb84f;
+    border-color: #ffb84f;
+}
+
+.category-heading.optional {
+    color: #8ea3bd;
+    border-color: #8ea3bd;
+}
+
+.category-empty {
+    color: #8ea3bd;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-bottom: 16px;
+}

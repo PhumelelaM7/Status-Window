@@ -44,9 +44,7 @@
 
     {% if is_today and not day_schedule.day_started %}
 
-        <!-- Pre-start gate: today hasn't been committed to yet. -->
-        <!-- Only reflection (notes above) and starting the day are -->
-        <!-- available — quests, goals, and the timeline stay hidden. -->
+        <!-- Pre-start gate -->
         <div class="start-day-gate">
             <p>You haven't started today yet. Reflect above, then commit when ready.</p>
             <form method="post" action="{% url 'start_my_day' %}">
@@ -57,14 +55,9 @@
             </form>
         </div>
 
-        <!-- Still allowed pre-start: scheduling quests for future -->
-        <!-- dates, since that's planning ahead, not "today's work" -->
         <p><a href="{% url 'add_quest' %}">+ Schedule a quest for a future date</a></p>
 
     {% else %}
-
-        <!-- Full view: either today has been started, or this is a -->
-        <!-- past/future day being browsed, which was never gated -->
 
         <!-- Prominent action row: add a quest, view goals -->
         <div class="action-row">
@@ -78,7 +71,8 @@
 
         <p><strong>Start time:</strong> {{ day_schedule.start_time }}</p>
 
-        <!-- Progress bar: scheduled vs completed minutes -->
+        <!-- Progress bar: scheduled vs completed minutes, across -->
+        <!-- all categories combined -->
         <div class="progress-wrap">
             <div class="progress-label">
                 <span>{{ progress.completed_minutes }} / {{ progress.total_minutes }} min</span>
@@ -89,128 +83,40 @@
             </div>
         </div>
 
-        <!-- Timeline: one row per scheduled quest -->
-        {% if schedule_rows %}
+        <!-- Water ring: three independent schedules, one per -->
+        <!-- category, each starting from the same day start time -->
+
+        <h2 class="category-heading essential">Essential</h2>
+        {% if essential_rows %}
             <div class="timeline">
-                {% for row in schedule_rows %}
-                    <div class="timeline-row">
-
-                        <!-- Time label for this row -->
-                        <div class="timeline-time">{{ row.start }}</div>
-
-                        <!-- Diamond marker + connecting line down to the next row -->
-                        <div class="timeline-marker">
-                            <div class="timeline-diamond"></div>
-                            {% if not forloop.last %}
-                                <div class="timeline-line"></div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Main panel: quest details and all its action buttons -->
-                        <div class="timeline-panel {% if row.quest.is_failed %}failed{% endif %}"
-                             data-quest-id="{{ row.quest.id }}"
-                             data-quest-title="{{ row.quest.title }}"
-                             data-end-time="{{ row.end|time:'H:i' }}"
-                             data-is-completed="{{ row.quest.is_completed|yesno:'true,false' }}"
-                             data-is-failed="{{ row.quest.is_failed|yesno:'true,false' }}">
-
-                            <!-- Quest title + enable toggle + reorder arrows -->
-                            <div class="quest-header">
-                                <strong>{{ row.quest.title }}</strong>
-                                <div class="quest-header-controls">
-                                    <form method="post"
-                                          action="{% url 'toggle_quest_enabled' row.quest.id %}">
-                                        {% csrf_token %}
-                                        <button type="submit"
-                                                class="toggle-btn {% if row.quest.is_enabled %}on{% endif %}">
-                                            {% if row.quest.is_enabled %}ON{% else %}OFF{% endif %}
-                                        </button>
-                                    </form>
-                                    <div class="reorder-buttons">
-                                        <form method="post"
-                                              action="{% url 'move_quest' row.quest.id 'up' %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="arrow-btn">▲</button>
-                                        </form>
-                                        <form method="post"
-                                              action="{% url 'move_quest' row.quest.id 'down' %}">
-                                            {% csrf_token %}
-                                            <button type="submit" class="arrow-btn">▼</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Notes: full-width, sits directly under the header row -->
-                            <details class="quest-notes">
-                                <summary>› notes</summary>
-                                <form method="post"
-                                      action="{% url 'update_quest_notes' row.quest.id %}">
-                                    {% csrf_token %}
-                                    <textarea name="notes"
-                                              rows="3"
-                                              placeholder="Add a note for this quest...">{{ row.quest.notes }}</textarea>
-                                    <button type="submit" class="save-notes-btn">Save</button>
-                                </form>
-                            </details>
-
-                            <!-- Computed start/end time + duration -->
-                            <span class="quest-meta">
-                                {{ row.start }} – {{ row.end }}
-                                ({{ row.quest.duration_minutes }} min)
-                            </span>
-
-                            {% if not row.quest.is_completed and not row.quest.is_failed %}
-                                <!-- Fire ring: jump into a distraction-free focus screen -->
-                                <a href="{% url 'focus_quest' row.quest.id %}" class="focus-link">
-                                    ▶ Focus
-                                </a>
-                            {% endif %}
-
-                            {% if not row.quest.is_failed %}
-                                <!-- Reschedule link -->
-                                <a href="{% url 'reschedule_quest' row.quest.id %}" class="reschedule-link">
-                                    ↻ Reschedule
-                                </a>
-                            {% endif %}
-
-                            <!-- Linked goal, if any -->
-                            {% if row.quest.goal %}
-                                <em>[Goal: {{ row.quest.goal.title }}]</em>
-                            {% endif %}
-
-                            <!-- Disabled / failed status markers -->
-                            {% if not row.quest.is_enabled %}
-                                <em>(disabled)</em>
-                            {% endif %}
-                            {% if row.quest.is_failed %}
-                                <em class="failed-marker">✗ Failed</em>
-                            {% endif %}
-
-                            {% if not row.quest.is_failed %}
-                                <!-- Mark complete / done button -->
-                                <form method="post"
-                                      action="{% url 'toggle_quest_complete' row.quest.id %}"
-                                      class="complete-form">
-                                    {% csrf_token %}
-                                    {% if row.quest.is_completed %}
-                                        <button type="submit" class="complete-btn done">
-                                            ✅ Done
-                                        </button>
-                                    {% else %}
-                                        <button type="submit" class="complete-btn">
-                                            Mark complete
-                                        </button>
-                                    {% endif %}
-                                </form>
-                            {% endif %}
-
-                        </div>
-                    </div>
+                {% for row in essential_rows %}
+                    {% include "quests/_quest_row.html" %}
                 {% endfor %}
             </div>
         {% else %}
-            <p>No quests scheduled for today.</p>
+            <p class="category-empty">No essential quests today.</p>
+        {% endif %}
+
+        <h2 class="category-heading flexible">Flexible</h2>
+        {% if flexible_rows %}
+            <div class="timeline">
+                {% for row in flexible_rows %}
+                    {% include "quests/_quest_row.html" %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="category-empty">No flexible quests today.</p>
+        {% endif %}
+
+        <h2 class="category-heading optional">Optional</h2>
+        {% if optional_rows %}
+            <div class="timeline">
+                {% for row in optional_rows %}
+                    {% include "quests/_quest_row.html" %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="category-empty">No optional quests today.</p>
         {% endif %}
 
         <!-- Clear day button + hint -->

@@ -1,0 +1,106 @@
+<!-- A single quest row: time label, diamond marker, panel with
+     all its controls. Included once per quest, per category
+     section, by today.html -->
+<div class="timeline-row">
+
+    <div class="timeline-time">{{ row.start }}</div>
+
+    <div class="timeline-marker">
+        <div class="timeline-diamond"></div>
+        {% if not forloop.last %}
+            <div class="timeline-line"></div>
+        {% endif %}
+    </div>
+
+    <div class="timeline-panel {% if row.quest.is_failed %}failed{% endif %}"
+         data-quest-id="{{ row.quest.id }}"
+         data-quest-title="{{ row.quest.title }}"
+         data-end-time="{{ row.end|time:'H:i' }}"
+         data-is-completed="{{ row.quest.is_completed|yesno:'true,false' }}"
+         data-is-failed="{{ row.quest.is_failed|yesno:'true,false' }}">
+
+        <div class="quest-header">
+            <strong>{{ row.quest.title }}</strong>
+            <div class="quest-header-controls">
+                <form method="post"
+                      action="{% url 'toggle_quest_enabled' row.quest.id %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="toggle-btn {% if row.quest.is_enabled %}on{% endif %}">
+                        {% if row.quest.is_enabled %}ON{% else %}OFF{% endif %}
+                    </button>
+                </form>
+                <div class="reorder-buttons">
+                    <form method="post"
+                          action="{% url 'move_quest' row.quest.id 'up' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="arrow-btn">▲</button>
+                    </form>
+                    <form method="post"
+                          action="{% url 'move_quest' row.quest.id 'down' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="arrow-btn">▼</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <details class="quest-notes">
+            <summary>› notes</summary>
+            <form method="post"
+                  action="{% url 'update_quest_notes' row.quest.id %}">
+                {% csrf_token %}
+                <textarea name="notes"
+                          rows="3"
+                          placeholder="Add a note for this quest...">{{ row.quest.notes }}</textarea>
+                <button type="submit" class="save-notes-btn">Save</button>
+            </form>
+        </details>
+
+        <span class="quest-meta">
+            {{ row.start }} – {{ row.end }}
+            ({{ row.quest.duration_minutes }} min)
+        </span>
+
+        {% if not row.quest.is_completed and not row.quest.is_failed %}
+            <a href="{% url 'focus_quest' row.quest.id %}" class="focus-link">
+                ▶ Focus
+            </a>
+        {% endif %}
+
+        {% if not row.quest.is_failed %}
+            <a href="{% url 'reschedule_quest' row.quest.id %}" class="reschedule-link">
+                ↻ Reschedule
+            </a>
+        {% endif %}
+
+        {% if row.quest.goal %}
+            <em>[Goal: {{ row.quest.goal.title }}]</em>
+        {% endif %}
+
+        {% if not row.quest.is_enabled %}
+            <em>(disabled)</em>
+        {% endif %}
+        {% if row.quest.is_failed %}
+            <em class="failed-marker">✗ Failed</em>
+        {% endif %}
+
+        {% if not row.quest.is_failed %}
+            <form method="post"
+                  action="{% url 'toggle_quest_complete' row.quest.id %}"
+                  class="complete-form">
+                {% csrf_token %}
+                {% if row.quest.is_completed %}
+                    <button type="submit" class="complete-btn done">
+                        ✅ Done
+                    </button>
+                {% else %}
+                    <button type="submit" class="complete-btn">
+                        Mark complete
+                    </button>
+                {% endif %}
+            </form>
+        {% endif %}
+
+    </div>
+</div>

@@ -50,6 +50,26 @@ class Quest(models.Model):
     # but stays in the database rather than being deleted.
     is_enabled = models.BooleanField(default=True)
 
+    # Water ring: catogirizes how firm this quest's commitment is.
+    # Essential = must happen. Flexible = can move if needed.
+    # Optional = would be good, but isnt essential. Each category
+    # gets its own independent mini-schedule on the daily view,
+    # rather than competing for the same time slots.
+    ESSENTIAL = "essential"
+    FLEXIBLE = "flexible"
+    OPTIONAL = "optional"
+    CATEGORY_CHOICES = [
+        (ESSENTIAL, "Essential"),
+        (FLEXIBLE, "Flexible"),
+        (OPTIONAL, "Optional"),
+    ]
+
+    category = models.CharField(
+        max_length=10,
+        choices=CATEGORY_CHOICES,
+        default=ESSENTIAL,
+    )
+
     # Computed/stored start time
     start_time = models.TimeField(default=time(9, 30))
 

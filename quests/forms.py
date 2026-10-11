@@ -4,9 +4,10 @@
 from django import forms
 from .models import Quest
 
+
 class QuestForm(forms.ModelForm):
     """Form for creating or editing a Quest.
-    
+
     Built from the Quest model itself, so its fields and basic
     validation (e.g. required fields, valid time format) stay in
     sync automatically if the model changes later.
@@ -37,6 +38,7 @@ class QuestForm(forms.ModelForm):
         fields = [
             "title",
             "goal",
+            "category",
             "scheduled_date",
             "start_time",
             "duration_minutes",
@@ -48,4 +50,5 @@ class QuestForm(forms.ModelForm):
         widgets = {
             "scheduled_date": forms.DateInput(attrs={"type": "date"}),
             "start_time": forms.TimeInput(attrs={"type": "time"}),
+            "category": forms.Select(),
         }
