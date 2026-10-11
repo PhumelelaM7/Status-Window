@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ous*9()+ne6r8-$j_mj#_v2+)fery(*$h(%c14r3b3d=mihy91'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-fallback-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -78,18 +82,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        # Switched from sqlite3 to mysql — MariaDB uses the same
-        # 'mysql' backend, since MariaDB is protocol-compatible
-        # with MySQL
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'status_window',
-        'USER': 'status_window_user',
-        'PASSWORD': 'PMJ@ke89!!',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv('DB_NAME', 'status_window'),
+        'USER': os.getenv('DB_USER', 'status_window_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
-            # Ensures proper handling of full Unicode (including
-            # emoji, which this app actually uses in its UI)
             'charset': 'utf8mb4',
         },
     }
