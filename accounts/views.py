@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from .forms import SignUpForm
+from .forms import SignUpForm, DisplayNameForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from quests.models import Quest, DaySchedule
@@ -32,6 +32,43 @@ def signup(request):
 
 @login_required
 def profile(request):
+    """Show stats and let the user change their display name.
+
+    POST saves only display_name on this user's Profile, then
+    redirects so a refresh does not resubmit the form.
+    """
+
+    profile = request.user.profile
+
+    if request.method == "POST":
+        form = DisplayNameForm(request.POST, instance=profile)
+        if form.is_valid():
+            # instance=profile writes onto the existing row,
+            # not a new Profile.
+            form.save()
+            return redirect("profile")
+    else:
+        form = DisplayNameForm(instance=profile)
+
+    quests_completed = Quest.objects.filter(
+        user=request.user, is_completed=True
+    ).count()
+    goals_completed = Goal.objects.filter(
+        user=request.user, is_completed=True
+    ).count()
+    days_cleared = DaySchedule.objects.filter(
+        user=request.user, is_cleared=True
+    ).count()
+
+    context = {
+        "profile": profile,
+        "form": form,
+        "quests_completed": quests_completed,
+        "goals_completed": goals_completed,
+        "days_cleared": days_cleared,
+        "date_joined": request.user.date_joined,
+    }
+    return render(request, "accounts/profile.html", context)
     """Show the current user's profile stats and allow editing display name."""
 
     profile = request.user.profile

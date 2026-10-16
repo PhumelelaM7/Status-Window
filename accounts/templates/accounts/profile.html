@@ -3,13 +3,17 @@
 {% block title %}Profile — Status Window{% endblock %}
 
 {% block content %}
+<!-- Profile summary: editable display name plus lifetime counts. -->
 <div class="panel" style="max-width: 640px; margin: 24px auto;">
   <h1 class="glow-text">PROFILE</h1>
 
-  <p>
-    <strong>{{ profile.display_name|default:user.username }}</strong><br>
-    <span class="mono">@{{ user.username }}</span>
-  </p>
+  <!-- POST updates Profile.display_name only. Username stays the login name. -->
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save name</button>
+  </form>
+  <p><span class="mono">@{{ user.username }}</span></p>
 
   <div class="budget-strip panel">
     <div><span class="val mono">{{ profile.points }}</span> points</div>
