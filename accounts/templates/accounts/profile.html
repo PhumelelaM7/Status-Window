@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — Status Window{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 640px; margin: 24px auto;">
+  <h1 class="glow-text">PROFILE</h1>
+
+  <p>
+    <strong>{{ profile.display_name|default:user.username }}</strong><br>
+    <span class="mono">@{{ user.username }}</span>
+  </p>
+
+  <div class="budget-strip panel">
+    <div><span class="val mono">{{ profile.points }}</span> points</div>
+    <div><span class="val mono">{{ quests_completed }}</span> quests completed</div>
+    <div><span class="val mono">{{ goals_completed }}</span> goals completed</div>
+    <div><span class="val mono">{{ days_cleared }}</span> days cleared</div>
+  </div>
+
+  <p class="subhead">
+    Member since {{ date_joined|date:"F j, Y" }}
+  </p>
+
+  <p>
+    <!-- Named route on the quests app is today_schedule, not today. -->
+    <a href="{% url 'today_schedule' %}">← Back to today</a>
+  </p>
+</div>
+{% endblock %}
