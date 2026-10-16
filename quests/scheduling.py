@@ -75,6 +75,33 @@ def compute_streak(cleared_dates, today):
     return streak
 
 
+def compute_highest_streak(cleared_dates):
+    """Longest run of consecutive cleared days, any time in the past.
+
+    Unlike compute_streak, this does not have to end today. A gap
+    of one or more days starts a new run. An empty set returns 0.
+    """
+
+    if not cleared_dates:
+        return 0
+
+    # Sort so each date is compared only to the one before it.
+    ordered = sorted(cleared_dates)
+    best = 1
+    current = 1
+
+    for previous, current_date in zip(ordered, ordered[1:]):
+        if current_date - previous == timedelta(days=1):
+            current += 1
+            if current > best:
+                best = current
+        else:
+            # Gap: this date starts a new run.
+            current = 1
+
+    return best
+
+
 def compute_progress(quests):
     """
     Work out total scheduled minutes vs completed minutes.
@@ -109,5 +136,7 @@ def compute_progress(quests):
         "total_minutes": total_minutes,
         "completed_minutes": completed_minutes,
         "percent": percent,
-    }     
+    }
+
+
 
